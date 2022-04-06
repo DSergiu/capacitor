@@ -353,6 +353,16 @@ public class WebViewLocalServer {
                         String base64 = Base64.encodeToString(userInfoBytes, Base64.NO_WRAP);
                         conn.setRequestProperty("Authorization", "Basic " + base64);
                     }
+                    conn.setInstanceFollowRedirects(false);
+                    conn.connect();
+                    int status = conn.getResponseCode();
+                    if (status == HttpURLConnection.HTTP_MOVED_TEMP ||
+                            status == HttpURLConnection.HTTP_MOVED_PERM ||
+                            status == HttpURLConnection.HTTP_SEE_OTHER
+                    ) {
+                        // Do not intercept in case of 302 redirect.
+                        return null;
+                    }
                     String cookie = conn.getHeaderField("Set-Cookie");
                     if (cookie != null) {
                         CookieManager.getInstance().setCookie(url, cookie);
